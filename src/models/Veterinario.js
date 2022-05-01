@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
+import {Paciente} from "./Paciente.js"
 import generarId from '../helpers/generarId.js'
 import bcrypt from 'bcrypt'
 
@@ -61,3 +62,13 @@ Veterinario.prototype.comprobarPassword = async function(passwordFor){
     console.log(passwordFor,"Este es el this : " + this.password)
     return await bcrypt.compare(passwordFor, this.password);
 }
+
+Veterinario.hasMany(Paciente,{
+    foreignKey: 'veterinarioId',
+    sourceKey: 'id'
+})
+
+Paciente.belongsTo(Veterinario,{
+    foreignKey: 'veterinarioId',
+    targetId: 'id'
+})

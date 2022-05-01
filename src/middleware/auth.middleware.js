@@ -7,9 +7,10 @@ const checkAuth = async (req, res, next) => {
         try {
             const token = authorization.split(' ')[1];
             const decoded = jwt.verify(token, process.env.JWT_SECRET)
-            req.veterinario = await Veterinario.findAll({
+            const veterinario = await Veterinario.findAll({
                 where:{id:decoded.id}, attributes: { exclude: ['password','token','confirmado'] }
             });
+            req.veterinario = veterinario[0].dataValues;
             return next();
         } catch (e) {
             const error = new Error('Token no Valido');
