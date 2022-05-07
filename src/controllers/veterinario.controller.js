@@ -1,9 +1,12 @@
 import generarWT from "../helpers/generarJWT.js"
 import { Veterinario } from "../models/Veterinario.js"
 import generarId from "../helpers/generarId.js"
+import emailRegistro from "../helpers/emailRegistro.js"
+import emailOlvidePassword from "../helpers/emailOlvidePassword.js"
+
 export const registrar = async (req,res) =>{
     // console.log(req.body)
-    const {email} = req.body
+    const {email,nombre} = req.body
     // Prevenir Usuario Duplicado
     const existeUsuario = await Veterinario.findOne({
         where: {email}
@@ -14,6 +17,7 @@ export const registrar = async (req,res) =>{
     }
     try {
         const veterinario = await Veterinario.create(req.body);
+        emailRegistro({email,nombre,token: veterinario.token} )
         res.json(veterinario);
     } catch (error) {
         console.log(error)
@@ -22,7 +26,7 @@ export const registrar = async (req,res) =>{
 
 export const perfil = (req,res) => {
     const {veterinario} = req;
-    res.json({ perfil: veterinario})
+    res.json(veterinario)
 }
 
 export const confirmar = async (req, res) => {
@@ -36,6 +40,7 @@ export const confirmar = async (req, res) => {
         usuarioConfirmar.token=null;
         usuarioConfirmar.confirmado=true;
         await usuarioConfirmar.save();
+        console.log('Guardado')
         res.json({msg: "Usuario Confirmado Correo"})
     } catch (error) {
         console.log(error)
@@ -66,11 +71,13 @@ export const olvidePassword= async (req,res) => {
     const existeVeterinario = await Veterinario.findOne({where: { email}})
     if (!existeVeterinario) {
         const error = new Error('El Usuario no existe');
-        return res.status(400).json({error: error.message});
+        return res.status(400).json({msg: error.message});
     }
     try {
         existeVeterinario.token = generarId();
         await existeVeterinario.save();
+        //Enviar email con instrucciones
+        emailOlvidePassword({email,nombre: existeVeterinario.nombre, token: existeVeterinario.token})
         res.json({msg: 'Hemos enviado un email con las instrucciones'})
     } catch (error) {
         console.log(error)

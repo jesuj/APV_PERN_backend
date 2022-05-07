@@ -45,8 +45,6 @@ export const Veterinario = sequelize.define('Veterinario',{
             record.dataValues.password = await bcrypt.hash(password,salt);
         }, 
         beforeUpdate : async (record, options) => {
-            console.log("Record antes de actualizar ",record)
-            console.log("Options despues de actualizar ",options)
             if (record._changed.has('password')) {
                 console.log('siu')
                 const salt = await bcrypt.genSalt(10);
